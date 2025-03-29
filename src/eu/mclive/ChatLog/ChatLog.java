@@ -11,7 +11,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import eu.mclive.ChatLog.Commands.Chatreport;
+import eu.mclive.ChatLog.Commands.Chatlog;
 import eu.mclive.ChatLog.MySQL.MySQL;
 import eu.mclive.ChatLog.MySQL.MySQLHandler;
 import eu.mclive.ChatLog.update.UpdateListener;
@@ -28,14 +28,8 @@ public class ChatLog extends JavaPlugin implements Listener {
     private eu.mclive.ChatLog.bstats.Metrics bstats;
     private Utils utils;
 
-    /**
-     * Issued ChatLogs since last submit.
-     */
     private int issuedChatLogs = 0;
 
-    /**
-     * Logged Messages since last submit.
-     */
     private int loggedMessages = 0;
 
     public void onEnable() {
@@ -44,7 +38,6 @@ public class ChatLog extends JavaPlugin implements Listener {
             sql = new MySQL(this);
             sqlHandler = new MySQLHandler(sql, this);
             startRefresh();
-			UpdateUtil.scheduleUpdateChecker(this);
             Bukkit.getConsoleSender().sendMessage(ChatColor.DARK_GREEN + "[ChatLog] " + ChatColor.GREEN + "MySQL successfully loaded.");
         } catch (Exception e1) {
             Bukkit.getConsoleSender().sendMessage(ChatColor.DARK_GREEN + "[ChatLog] " + ChatColor.RED + "Failled to load MySQL: " + e1.toString());
@@ -70,9 +63,8 @@ public class ChatLog extends JavaPlugin implements Listener {
                 Bukkit.getConsoleSender().sendMessage(ChatColor.DARK_GREEN + "[ChatLog] " + ChatColor.RED + "Failed to load bStats.");
             }
         }
-
+		UpdateUtil.scheduleUpdateChecker(this);
         this.cleanup();
-
         this.registerEvents();
         this.registerCommands();
 		boolean performUpdateCheck = getConfig().getBoolean("update-check");
@@ -97,7 +89,7 @@ public class ChatLog extends JavaPlugin implements Listener {
     }
 
     private void registerCommands() {
-        getCommand("chatreport").setExecutor(new Chatreport(this));
+        getCommand("chatlog").setExecutor(new Chatlog(this));
     }
 
     private void registerEvents() {
@@ -147,9 +139,9 @@ public class ChatLog extends JavaPlugin implements Listener {
                 String server = getConfig().getString("Server-Name");
                 String bypassCharacter = getConfig().getString("bypass-character");
                 String bypassPermission = getConfig().getString("bypass-permission");
-                //System.out.println(server + p + msg + timestamp);
+                String worldName = p.getWorld().getName();
                 if (bypassCharacter.isEmpty() || (msg.startsWith(bypassCharacter) && !p.hasPermission(bypassPermission)) || !msg.startsWith(bypassCharacter)) {
-                    sqlHandler.addMessage(server, p, msg, timestamp);
+                    sqlHandler.addMessage(server, p, msg, timestamp, worldName);
                 }
             }
         });
