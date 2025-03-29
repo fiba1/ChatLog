@@ -17,6 +17,7 @@ public class ChatListener implements Listener {
         if (e.isCancelled()) {
             return;
         }
-        plugin.getUtils().logMessage(e.getPlayer(), e.getMessage());
+		String worldName = e.getPlayer().getWorld().getName();
+        plugin.getUtils().logMessage(e.getPlayer(), worldName, e.getMessage());
     }
 }
